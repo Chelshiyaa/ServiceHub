@@ -2,12 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axios';
 import toast from 'react-hot-toast';
 
-// Async thunks
+// ======================= USER REGISTER ========================
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/user/register', userData);
+      const response = await axiosInstance.post('/api/auth/user/register', userData);
       toast.success('Registration successful!');
       return response.data;
     } catch (error) {
@@ -17,11 +17,12 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+// ======================= USER LOGIN ========================
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/user/login', credentials);
+      const response = await axiosInstance.post('/api/auth/user/login', credentials);
       toast.success('Login successful!');
       return response.data;
     } catch (error) {
@@ -31,11 +32,12 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// ======================= PROVIDER REGISTER ========================
 export const registerProvider = createAsyncThunk(
   'auth/registerProvider',
   async (providerData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/provider/register', providerData);
+      const response = await axiosInstance.post('/api/auth/provider/register', providerData);
       toast.success('Registration successful! Pending admin approval.');
       return response.data;
     } catch (error) {
@@ -45,11 +47,12 @@ export const registerProvider = createAsyncThunk(
   }
 );
 
+// ======================= PROVIDER LOGIN ========================
 export const loginProvider = createAsyncThunk(
   'auth/loginProvider',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/provider/login', credentials);
+      const response = await axiosInstance.post('/api/auth/provider/login', credentials);
       toast.success('Login successful!');
       return response.data;
     } catch (error) {
@@ -59,11 +62,12 @@ export const loginProvider = createAsyncThunk(
   }
 );
 
+// ======================= ADMIN LOGIN ========================
 export const loginAdmin = createAsyncThunk(
   'auth/loginAdmin',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/admin/login', credentials);
+      const response = await axiosInstance.post('/api/auth/admin/login', credentials);
       toast.success('Login successful!');
       return response.data;
     } catch (error) {
@@ -73,9 +77,10 @@ export const loginAdmin = createAsyncThunk(
   }
 );
 
+// ======================= LOGOUT ========================
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
-    await axiosInstance.post('/auth/logout');
+    await axiosInstance.post('/api/auth/logout');
     toast.success('Logged out successfully');
     return null;
   } catch (error) {
@@ -100,7 +105,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register User
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -116,7 +120,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login User
+
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -132,7 +136,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Register Provider
+
       .addCase(registerProvider.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -148,7 +152,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login Provider
+
       .addCase(loginProvider.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -164,7 +168,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login Admin
+
       .addCase(loginAdmin.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -180,7 +184,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Logout
+
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
@@ -192,4 +196,3 @@ const authSlice = createSlice({
 
 export const { clearError } = authSlice.actions;
 export default authSlice.reducer;
-
