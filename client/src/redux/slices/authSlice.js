@@ -2,6 +2,11 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axios';
 import toast from 'react-hot-toast';
 
+// CLEAN ERROR MESSAGE
+const formatError = (error) => {
+  return error?.response?.data?.message || error?.message || "Something went wrong";
+};
+
 // ================= USER REGISTER =================
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
@@ -11,8 +16,8 @@ export const registerUser = createAsyncThunk(
       toast.success('Registration successful!');
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
-      return rejectWithValue(error.response?.data || error.message);
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
     }
   }
 );
@@ -26,8 +31,8 @@ export const loginUser = createAsyncThunk(
       toast.success('Login successful!');
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
-      return rejectWithValue(error.response?.data || error.message);
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
     }
   }
 );
@@ -41,8 +46,8 @@ export const registerProvider = createAsyncThunk(
       toast.success('Provider registered (pending admin approval)');
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
-      return rejectWithValue(error.response?.data || error.message);
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
     }
   }
 );
@@ -56,8 +61,8 @@ export const loginProvider = createAsyncThunk(
       toast.success('Login successful!');
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
-      return rejectWithValue(error.response?.data || error.message);
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
     }
   }
 );
@@ -71,8 +76,8 @@ export const loginAdmin = createAsyncThunk(
       toast.success('Admin login successful!');
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
-      return rejectWithValue(error.response?.data || error.message);
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
     }
   }
 );
@@ -86,13 +91,20 @@ export const logout = createAsyncThunk(
       toast.success('Logged out successfully');
       return null;
     } catch (error) {
-      return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(formatError(error));
     }
   }
 );
 
 const initialState = {
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: (() => {
+    try {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
+  })(),
   token: localStorage.getItem('token') || null,
   loading: false,
   error: null,
@@ -108,86 +120,97 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // 🔹 REGISTER USER
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
-        state.token = action.payload.token;
-        localStorage.setItem('user', JSON.stringify(action.payload.data));
-        localStorage.setItem('token', action.payload.token);
+        state.user = action.payload.data || null;
+        state.token = action.payload.token || null;
+
+        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem('token', state.token);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
+      // 🔹 LOGIN USER
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
-        state.token = action.payload.token;
-        localStorage.setItem('user', JSON.stringify(action.payload.data));
-        localStorage.setItem('token', action.payload.token);
+        state.user = action.payload.data || null;
+        state.token = action.payload.token || null;
+
+        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem('token', state.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
+      // 🔹 REGISTER PROVIDER
       .addCase(registerProvider.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(registerProvider.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
-        state.token = action.payload.token;
-        localStorage.setItem('user', JSON.stringify(action.payload.data));
-        localStorage.setItem('token', action.payload.token);
+        state.user = action.payload.data || null;
+        state.token = action.payload.token || null;
+
+        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem('token', state.token);
       })
       .addCase(registerProvider.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
+      // 🔹 LOGIN PROVIDER
       .addCase(loginProvider.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginProvider.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
-        state.token = action.payload.token;
-        localStorage.setItem('user', JSON.stringify(action.payload.data));
-        localStorage.setItem('token', action.payload.token);
+        state.user = action.payload.data || null;
+        state.token = action.payload.token || null;
+
+        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem('token', state.token);
       })
       .addCase(loginProvider.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
+      // 🔹 ADMIN LOGIN
       .addCase(loginAdmin.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.data;
-        state.token = action.payload.token;
-        localStorage.setItem('user', JSON.stringify(action.payload.data));
-        localStorage.setItem('token', action.payload.token);
+        state.user = action.payload.data || null;
+        state.token = action.payload.token || null;
+
+        localStorage.setItem('user', JSON.stringify(state.user));
+        localStorage.setItem('token', state.token);
       })
       .addCase(loginAdmin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
+      // 🔹 LOGOUT
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;

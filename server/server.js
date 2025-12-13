@@ -25,6 +25,7 @@ const allowedOrigins = [
   // process.env.CLIENT_URL_2,                       // Preview Deployments (optional)
   "http://localhost:5173",                        // Local Development (Vite)
   "http://localhost:3000",
+  "http://localhost:5174",                        // Alternative Vite port
 ].filter(Boolean);
 
 // Middleware

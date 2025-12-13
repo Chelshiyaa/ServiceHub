@@ -1,7 +1,13 @@
 import axios from "axios";
 
+// Get API URL from environment variable
+// For production: Set VITE_API_URL in Vercel to your Render backend URL + /api
+// Example: https://your-backend.onrender.com/api
+// For local development: Use .env file with VITE_API_URL=http://localhost:5000/api
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,  // https://servicehub-ujok.onrender.com/api
+  baseURL: API_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Provider from '../models/Provider.js';
+import Category from '../models/Category.js';
 import { generateToken } from '../utils/generateToken.js';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
@@ -384,6 +385,23 @@ export const resetPassword = async (req, res, next) => {
       success: true,
       message: 'Password reset successful',
       token,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all categories (public)
+// @route   GET /api/auth/categories
+// @access  Public
+export const getCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.find().select('name _id');
+
+    res.status(200).json({
+      success: true,
+      count: categories.length,
+      data: categories,
     });
   } catch (error) {
     next(error);
