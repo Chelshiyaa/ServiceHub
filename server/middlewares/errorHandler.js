@@ -5,6 +5,12 @@ export const errorHandler = (err, req, res, next) => {
   // Log to console for dev
   console.error(err);
 
+  // Multer errors
+  if (err?.code === 'LIMIT_FILE_SIZE') {
+    const message = 'File too large (max 5MB)';
+    error = { message, statusCode: 400 };
+  }
+
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
     const message = 'Resource not found';

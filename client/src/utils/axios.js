@@ -1,35 +1,38 @@
 import axios from "axios";
 
-// Get API URL from environment variable
-// For production: Set VITE_API_URL in Vercel to your Render backend URL + /api
-// Example: https://your-backend.onrender.com/api
-// For local development: Use .env file with VITE_API_URL=http://localhost:5000/api
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// In local dev, ALWAYS use relative "/api" so Vite proxy forwards to localhost:5000,
+// even if a system-level VITE_API_URL is set (common cause of calls going to Render).
+const isLocalhost =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1");
+
+// In prod, set VITE_API_URL to your deployed backend + "/api".
+const API_URL = isLocalhost ? "/api" : import.meta.env.VITE_API_URL || "/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: true, // ✅ cookie auth
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor
+// Attach Bearer token (fallback when cookies aren't sent)
 axiosInstance.interceptors.request.use(
-  (config) => config,
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+  (config) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token && token !== "null" && token !== "undefined") {
+        config.headers = config.headers ?? {};
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // ignore storage errors
     }
-    return Promise.reject(error);
-  }
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
 export default axiosInstance;

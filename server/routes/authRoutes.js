@@ -9,11 +9,12 @@ import {
   getResetToken,
   resetPassword,
   getCategories,
+  getMe,
 } from '../controllers/authController.js';
 import { protect } from '../middlewares/auth.js';
 
 const router = express.Router();
-
+router.get("/me", protect, getMe);
 router.get('/categories', getCategories);
 router.post('/user/register', registerUser);
 router.post('/user/login', loginUser);

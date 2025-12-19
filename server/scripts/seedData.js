@@ -68,6 +68,7 @@ const categories = [
   { name: 'Tutor', icon: '📚', description: 'Educational and tutoring services' },
   { name: 'Cook', icon: '👨‍🍳', description: 'Cooking and catering services' },
   { name: 'Driver', icon: '🚗', description: 'Driving and transportation services' },
+  { name: 'Maid', icon: '🧽', description: 'Home maid and domestic help services' },
   { name: 'Cleaner', icon: '🧹', description: 'Cleaning and housekeeping services' },
   { name: 'AC Repair', icon: '❄️', description: 'AC installation and repair services' },
   { name: 'Photographer', icon: '📷', description: 'Photography and videography services' },
@@ -141,6 +142,11 @@ const serviceData = {
     names: ['Drive Safe', 'Car Service', 'Transport Pro', 'Drive Masters', 'Auto Service'],
     skills: ['City Driving', 'Highway', 'Long Distance', 'Event Service', 'Regular Service'],
     pricing: ['₹1500/day', '₹2000/day', '₹1200/day', '₹1800/day', '₹1600/day'],
+  },
+  'Maid': {
+    names: ['Home Help', 'Domestic Care', 'Maid Services', 'House Assist', 'Care Helpers'],
+    skills: ['Utensil Cleaning', 'Sweeping & Mopping', 'Dusting', 'Laundry', 'Kitchen Help'],
+    pricing: ['₹6000/month', '₹8000/month', '₹5000/month', '₹7000/month', '₹9000/month'],
   },
   'Cleaner': {
     names: ['Clean Pro', 'Sparkle Clean', 'Hygiene Masters', 'Clean Care', 'Spotless Service'],
@@ -223,10 +229,10 @@ const seedData = async () => {
     await connectDB();
     console.log('Connected to MongoDB');
 
-    // Clear existing data (optional - comment out if you want to keep existing data)
-    // await Provider.deleteMany({});
-    // await Category.deleteMany({});
-    // console.log('Cleared existing data');
+    // Clear existing providers so you always end up with a consistent dataset.
+    // (Categories are upserted by name below, so we keep them.)
+    await Provider.deleteMany({});
+    console.log('Cleared existing providers');
 
     // Create categories
     console.log('Creating categories...');
@@ -243,10 +249,16 @@ const seedData = async () => {
       }
     }
 
-    // Create 200 service providers
+    // Create 200-300 service providers (default: 250)
     console.log('\nCreating service providers...');
     const providers = [];
-    const totalProviders = 200;
+    const totalProviders = Math.max(
+      1,
+      Math.min(
+        1000,
+        Number(process.env.SEED_PROVIDERS || process.argv?.[2] || 250)
+      )
+    );
 
     for (let i = 0; i < totalProviders; i++) {
       // Random category

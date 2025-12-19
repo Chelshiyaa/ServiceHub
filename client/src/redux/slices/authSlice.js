@@ -1,117 +1,165 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../utils/axios';
-import toast from 'react-hot-toast';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axiosInstance from "../../utils/axios";
+import toast from "react-hot-toast";
 
-// CLEAN ERROR MESSAGE
-const formatError = (error) => {
-  return error?.response?.data?.message || error?.message || "Something went wrong";
+/* ================= ERROR FORMATTER ================= */
+const formatError = (error) =>
+  error?.response?.data?.message || error?.message || "Something went wrong";
+
+/* ================= LOCAL STORAGE HELPERS ================= */
+const getStoredToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token || token === "null" || token === "undefined") return null;
+  return token;
 };
 
-// ================= USER REGISTER =================
-export const registerUser = createAsyncThunk(
-  'auth/registerUser',
-  async (userData, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('/auth/user/register', userData);
-      toast.success('Registration successful!');
-      return response.data;
-    } catch (error) {
-      toast.error(formatError(error));
-      return rejectWithValue(formatError(error));
-    }
+const setStoredToken = (token) => {
+  if (!token || token === "null" || token === "undefined") {
+    localStorage.removeItem("token");
+  } else {
+    localStorage.setItem("token", token);
   }
-);
+};
 
-// ================= USER LOGIN =================
-export const loginUser = createAsyncThunk(
-  'auth/loginUser',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('/auth/user/login', credentials);
-      toast.success('Login successful!');
-      return response.data;
-    } catch (error) {
-      toast.error(formatError(error));
-      return rejectWithValue(formatError(error));
-    }
-  }
-);
-
-// ================= PROVIDER REGISTER =================
-export const registerProvider = createAsyncThunk(
-  'auth/registerProvider',
-  async (providerData, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('/auth/provider/register', providerData);
-      toast.success('Provider registered (pending admin approval)');
-      return response.data;
-    } catch (error) {
-      toast.error(formatError(error));
-      return rejectWithValue(formatError(error));
-    }
-  }
-);
-
-// ================= PROVIDER LOGIN =================
-export const loginProvider = createAsyncThunk(
-  'auth/loginProvider',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('/auth/provider/login', credentials);
-      toast.success('Login successful!');
-      return response.data;
-    } catch (error) {
-      toast.error(formatError(error));
-      return rejectWithValue(formatError(error));
-    }
-  }
-);
-
-// ================= ADMIN LOGIN =================
-export const loginAdmin = createAsyncThunk(
-  'auth/loginAdmin',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.post('/auth/admin/login', credentials);
-      toast.success('Admin login successful!');
-      return response.data;
-    } catch (error) {
-      toast.error(formatError(error));
-      return rejectWithValue(formatError(error));
-    }
-  }
-);
-
-// ================= LOGOUT =================
-export const logout = createAsyncThunk(
-  'auth/logout',
+/* ================= LOAD USER ================= */
+export const loadUser = createAsyncThunk(
+  "auth/loadUser",
   async (_, { rejectWithValue }) => {
     try {
-      await axiosInstance.post('/auth/logout');
-      toast.success('Logged out successfully');
-      return null;
+      // Deployed backend variants:
+      // - New:   GET /api/auth/me
+      // - Older: GET /api/user/me | /api/provider/me | /api/admin/me
+      const candidates = ["/auth/me", "/user/me", "/provider/me", "/admin/me"];
+
+      for (const path of candidates) {
+        try {
+          const res = await axiosInstance.get(path);
+          const maybeUser = res?.data?.user ?? res?.data?.data ?? res?.data?.profile;
+          if (maybeUser) return maybeUser;
+          // If API returns the user object at top-level, accept it too
+          if (res?.data && typeof res.data === "object") return res.data;
+        } catch (err) {
+          const status = err?.response?.status;
+          // If the route doesn't exist on the deployed backend, try next.
+          if (status === 404) continue;
+          // Any other failure (401/403/etc) means not logged in / invalid session.
+          throw err;
+        }
+      }
+
+      // None of the endpoints exist (or returned unexpected payload)
+      return rejectWithValue(null);
     } catch (error) {
+      // Session is invalid/missing -> clear any stale persisted auth
+      try {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      } catch {
+        // ignore storage errors
+      }
+      return rejectWithValue(null);
+    }
+  }
+);
+
+/* ================= REGISTER ================= */
+export const registerUser = createAsyncThunk(
+  "auth/registerUser",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/auth/user/register", data);
+      toast.success("Registration successful");
+      return res.data;
+    } catch (error) {
+      toast.error(formatError(error));
       return rejectWithValue(formatError(error));
     }
   }
 );
 
+export const registerProvider = createAsyncThunk(
+  "auth/registerProvider",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/auth/provider/register", data);
+      toast.success("Provider registered (pending approval)");
+      return res.data;
+    } catch (error) {
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
+    }
+  }
+);
+
+/* ================= LOGIN ================= */
+export const loginUser = createAsyncThunk(
+  "auth/loginUser",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/auth/user/login", credentials);
+      toast.success("Login successful");
+      return res.data;
+    } catch (error) {
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
+    }
+  }
+);
+
+export const loginProvider = createAsyncThunk(
+  "auth/loginProvider",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/auth/provider/login", credentials);
+      toast.success("Login successful");
+      return res.data;
+    } catch (error) {
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
+    }
+  }
+);
+
+export const loginAdmin = createAsyncThunk(
+  "auth/loginAdmin",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/auth/admin/login", credentials);
+      toast.success("Admin login successful");
+      return res.data;
+    } catch (error) {
+      toast.error(formatError(error));
+      return rejectWithValue(formatError(error));
+    }
+  }
+);
+
+/* ================= LOGOUT ================= */
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async () => {
+    await axiosInstance.post("/auth/logout");
+    toast.success("Logged out successfully");
+  }
+);
+
+/* ================= INITIAL STATE ================= */
 const initialState = {
   user: (() => {
     try {
-      const user = localStorage.getItem('user');
-      return user ? JSON.parse(user) : null;
+      return JSON.parse(localStorage.getItem("user")) || null;
     } catch {
       return null;
     }
   })(),
-  token: localStorage.getItem('token') || null,
+  token: getStoredToken(),
   loading: false,
   error: null,
 };
 
+/* ================= SLICE ================= */
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -119,104 +167,59 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    /* 🔹 ALL addCase FIRST */
     builder
-      // 🔹 REGISTER USER
-      .addCase(registerUser.pending, (state) => {
+      .addCase(loadUser.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(loadUser.fulfilled, (state, action) => {
+        state.user = action.payload;
         state.loading = false;
-        state.user = action.payload.data || null;
-        state.token = action.payload.token || null;
-
-        localStorage.setItem('user', JSON.stringify(state.user));
-        localStorage.setItem('token', state.token);
       })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // 🔹 LOGIN USER
-      .addCase(loginUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.data || null;
-        state.token = action.payload.token || null;
-
-        localStorage.setItem('user', JSON.stringify(state.user));
-        localStorage.setItem('token', state.token);
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // 🔹 REGISTER PROVIDER
-      .addCase(registerProvider.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerProvider.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.data || null;
-        state.token = action.payload.token || null;
-
-        localStorage.setItem('user', JSON.stringify(state.user));
-        localStorage.setItem('token', state.token);
-      })
-      .addCase(registerProvider.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // 🔹 LOGIN PROVIDER
-      .addCase(loginProvider.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginProvider.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.data || null;
-        state.token = action.payload.token || null;
-
-        localStorage.setItem('user', JSON.stringify(state.user));
-        localStorage.setItem('token', state.token);
-      })
-      .addCase(loginProvider.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // 🔹 ADMIN LOGIN
-      .addCase(loginAdmin.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginAdmin.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.data || null;
-        state.token = action.payload.token || null;
-
-        localStorage.setItem('user', JSON.stringify(state.user));
-        localStorage.setItem('token', state.token);
-      })
-      .addCase(loginAdmin.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // 🔹 LOGOUT
-      .addCase(logout.fulfilled, (state) => {
+      .addCase(loadUser.rejected, (state) => {
         state.user = null;
         state.token = null;
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-      });
+        state.loading = false;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.loading = false;
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      })
+
+      /* 🔹 MATCHERS AFTER ALL CASES */
+      .addMatcher(
+        (action) =>
+          action.type.endsWith("/fulfilled") &&
+          (action.type.includes("login") ||
+            action.type.includes("register")),
+        (state, action) => {
+          state.user = action.payload.data;
+          state.token = action.payload.token;
+          state.loading = false;
+
+          localStorage.setItem("user", JSON.stringify(state.user));
+          setStoredToken(state.token);
+        }
+      )
+      .addMatcher(
+        (action) =>
+          action.type.startsWith("auth/") && action.type.endsWith("/pending"),
+        (state) => {
+          state.loading = true;
+          state.error = null;
+        }
+      )
+      .addMatcher(
+        (action) =>
+          action.type.startsWith("auth/") && action.type.endsWith("/rejected"),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      );
   },
 });
 

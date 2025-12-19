@@ -7,10 +7,13 @@ import { FiUsers, FiBriefcase, FiClock, FiCheckCircle, FiXCircle, FiTag, FiArrow
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const { stats } = useSelector((state) => state.admin);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(getStats());
-  }, [dispatch]);
+    if (user?.role === 'admin') {
+      dispatch(getStats());
+    }
+  }, [dispatch, user?.role]);
 
   const statCards = [
     {

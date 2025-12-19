@@ -1,14 +1,18 @@
-import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const PrivateRoute = ({ children, allowedRoles = [] }) => {
-  const { user } = useSelector((state) => state.auth);
+const PrivateRoute = ({ children, allowedRoles }) => {
+  const { user, loading } = useSelector((state) => state.auth);
+
+  if (loading) {
+    return <div className="text-center mt-20">Loading...</div>;
+  }
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 
@@ -16,4 +20,3 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
 };
 
 export default PrivateRoute;
-

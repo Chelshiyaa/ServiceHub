@@ -1,6 +1,37 @@
 import Provider from '../models/Provider.js';
 import cloudinary, { uploadToCloudinary } from '../config/cloudinary.js';
 
+// @desc    Get provider details (public)
+// @route   GET /api/provider/:id
+// @access  Public
+export const getProviderPublic = async (req, res, next) => {
+  try {
+    const provider = await Provider.findById(req.params.id).populate('category');
+
+    if (!provider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Provider not found',
+      });
+    }
+
+    // Only show approved providers to public
+    if (provider.status !== 'approved') {
+      return res.status(404).json({
+        success: false,
+        message: 'Provider not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: provider,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get provider profile
 // @route   GET /api/provider/profile
 // @access  Private
@@ -79,6 +110,13 @@ export const updateProviderProfile = async (req, res, next) => {
 export const addServiceImages = async (req, res, next) => {
   try {
     const provider = await Provider.findById(req.user._id);
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No images uploaded (field name must be "images")',
+      });
+    }
 
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map((file) => 

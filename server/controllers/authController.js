@@ -5,6 +5,22 @@ import { generateToken } from '../utils/generateToken.js';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
 
+const getCookieOptions = () => {
+  // In production (Vercel <-> Render), cookies are cross-site and must be:
+  // - secure: true
+  // - sameSite: "none"
+  //
+  // In local development over http://, secure cookies will NOT be stored/sent,
+  // so we must use secure: false and sameSite: "lax".
+  const isProd = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+};
+
 // @desc    Register user
 // @route   POST /api/auth/user/register
 // @access  Public
@@ -23,12 +39,7 @@ export const registerUser = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(201).json({
       success: true,
@@ -70,12 +81,7 @@ export const loginUser = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(200).json({
       success: true,
@@ -129,12 +135,7 @@ export const registerProvider = async (req, res, next) => {
 
     const token = generateToken(provider._id);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(201).json({
       success: true,
@@ -177,12 +178,7 @@ export const loginProvider = async (req, res, next) => {
 
     const token = generateToken(provider._id);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(200).json({
       success: true,
@@ -243,12 +239,7 @@ export const loginAdmin = async (req, res, next) => {
 
     const token = generateToken(admin._id);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(200).json({
       success: true,
@@ -268,17 +259,18 @@ export const loginAdmin = async (req, res, next) => {
 // @desc    Logout user
 // @route   POST /api/auth/logout
 // @access  Private
+// controllers/authController.js
+
 export const logout = async (req, res) => {
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
-  });
+  // Clear cookie using same attributes that were used to set it
+  res.cookie('token', '', { ...getCookieOptions(), expires: new Date(0) });
 
   res.status(200).json({
     success: true,
-    message: 'Logged out successfully',
+    message: "Logged out successfully",
   });
 };
+
 
 // @desc    Get reset token
 // @route   POST /api/auth/reset-token
@@ -374,12 +366,7 @@ export const resetPassword = async (req, res, next) => {
 
     const token = generateToken(account._id);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(200).json({
       success: true,
@@ -408,3 +395,9 @@ export const getCategories = async (req, res, next) => {
   }
 };
 
+export const getMe = (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};

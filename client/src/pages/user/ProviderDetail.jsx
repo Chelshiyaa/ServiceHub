@@ -16,7 +16,8 @@ const ProviderDetail = () => {
   useEffect(() => {
     const fetchProvider = async () => {
       try {
-        const response = await axiosInstance.get(`/admin/providers/${id}`);
+        // Public endpoint for users browsing providers
+        const response = await axiosInstance.get(`/provider/${id}`);
         setProvider(response.data.data);
       } catch (error) {
         console.error('Failed to fetch provider:', error);
