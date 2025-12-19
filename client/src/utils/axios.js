@@ -35,4 +35,25 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response interceptor to handle 401 errors gracefully
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Suppress console errors for expected 401s (not logged in)
+    // Only log unexpected errors
+    if (error?.response?.status === 401) {
+      // Expected 401s are handled by the calling code, don't spam console
+      // Only log if it's not a /me endpoint (which is expected to fail when not logged in)
+      const url = error?.config?.url || "";
+      if (!url.includes("/me")) {
+        console.error("Authentication error:", error?.response?.data?.message || "Unauthorized");
+      }
+    } else if (error?.response?.status >= 500) {
+      // Log server errors
+      console.error("Server error:", error?.response?.data?.message || "Internal server error");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;

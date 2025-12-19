@@ -25,6 +25,18 @@ const setStoredToken = (token) => {
 export const loadUser = createAsyncThunk(
   "auth/loadUser",
   async (_, { rejectWithValue }) => {
+    // Skip API call if no token exists (user not logged in)
+    const token = getStoredToken();
+    if (!token) {
+      // Clear any stale data
+      try {
+        localStorage.removeItem("user");
+      } catch {
+        // ignore storage errors
+      }
+      return rejectWithValue(null);
+    }
+
     try {
       // Deployed backend variants:
       // - New:   GET /api/auth/me

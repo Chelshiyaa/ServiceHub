@@ -13,10 +13,7 @@ import { upload } from '../config/cloudinary.js';
 const router = express.Router();
 
 // Public provider details (for users browsing services)
-// IMPORTANT:
-// Keep this route public, but restrict it to a Mongo ObjectId so it doesn't
-// accidentally catch routes like "/profile" or "/services/images".
-router.get('/:id([0-9a-fA-F]{24})', getProviderPublic);
+router.get('/:id', getProviderPublic);
 
 router.use(protect);
 
