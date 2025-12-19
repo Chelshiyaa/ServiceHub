@@ -8,7 +8,7 @@ const isLocalhost =
     window.location.hostname === "127.0.0.1");
 
 // In prod, set VITE_API_URL to your deployed backend + "/api".
-const API_URL = isLocalhost ? "/api" : import.meta.env.VITE_API_URL || "/api";
+// const API_URL = isLocalhost ? "/api" : import.meta.env.VITE_API_URL || "/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
