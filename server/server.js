@@ -27,12 +27,13 @@ const app = express();
 
 // Allowed Frontend Domains
 const allowedOrigins = [
-  process.env.CLIENT_URL,                         // Production Frontend (Vercel)
-  // process.env.CLIENT_URL_2,                       // Preview Deployments (optional)
-  "http://localhost:5173",                        // Local Development (Vite)
+  "http://localhost:5173",
   "http://localhost:3000",
-  "http://localhost:5174",                        // Alternative Vite port
-].filter(Boolean);
+
+  // ✅ Vercel domains (ADD BOTH)
+  "https://service-hub-git-main-chelshiyas-projects.vercel.app",
+  "https://service-6kaiougi1-chelshiyas-projects.vercel.app",
+];
 
 // Middleware
 app.use(express.json());
