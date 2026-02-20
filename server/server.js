@@ -42,14 +42,7 @@ app.use(cookieParser());
 
 // CORS Setup
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("❌ CORS BLOCKED:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: true,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 };
