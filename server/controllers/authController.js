@@ -6,21 +6,13 @@ import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
 
 const getCookieOptions = () => {
-  // In production (Vercel <-> Render), cookies are cross-site and must be:
-  // - secure: true
-  // - sameSite: "none"
-  //
-  // In local development over http://, secure cookies will NOT be stored/sent,
-  // so we must use secure: false and sameSite: "lax".
-  const isProd = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    secure: true,          // 🔥 MUST for HTTPS
+    sameSite: "none",      // 🔥 MUST for cross-domain
     maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 };
-
 // @desc    Register user
 // @route   POST /api/auth/user/register
 // @access  Public
