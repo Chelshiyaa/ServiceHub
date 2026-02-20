@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 
 import { loadUser } from "./redux/slices/authSlice";
@@ -33,9 +33,8 @@ import AdminCategories from "./pages/admin/AdminCategories";
 
 function App() {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
 
-  // 🔥 AUTO LOGIN FIX (page refresh ke baad logout nahi hoga)
+  // ✅ Cookie-based auto login (runs once)
   useEffect(() => {
     dispatch(loadUser());
   }, [dispatch]);
@@ -53,7 +52,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/provider/:id" element={<ProviderDetail />} />
 
-          {/* Protected Search Route - Requires Login */}
+          {/* Protected Search */}
           <Route
             path="/search"
             element={
