@@ -4,16 +4,23 @@ import axios from "axios";
  * COOKIE-BASED AUTH (httpOnly cookie).
  *
  * - In development: we use Vite's proxy → `/api`
- * - In production: set `VITE_API_URL` to your backend's full URL (including `/api`)
- *   e.g. VITE_API_URL="https://your-backend-domain.com/api"
+ * - In production: set `VITE_API_URL` to your backend's base URL
+ *   (with or without `/api`; we'll normalize it).
  */
 
-// In dev: use Vite proxy (`/api` → http://localhost:5000/api)
-// In prod: set VITE_API_URL to full backend URL (including `/api`)
-const API_URL =
-  (typeof import.meta !== "undefined" &&
-    import.meta.env &&
-    import.meta.env.VITE_API_URL) || "/api";
+let API_URL = "/api";
+
+if (
+  typeof import.meta !== "undefined" &&
+  import.meta.env &&
+  import.meta.env.VITE_API_URL
+) {
+  const raw = import.meta.env.VITE_API_URL;
+  // If it already ends with /api, use as-is. Otherwise append /api.
+  API_URL = raw.endsWith("/api")
+    ? raw
+    : `${raw.replace(/\/$/, "")}/api`;
+}
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -37,10 +44,13 @@ axiosInstance.interceptors.response.use(
         );
       }
     } else if (error?.response?.status >= 500) {
-      console.error(
-        "Server error:",
-        error?.response?.data?.message || "Internal server error"
-      );
+      const serverMessage =
+        error?.response?.data?.message || "Internal server error";
+
+      // Don't spam console for known optional payment config issue
+      if (!serverMessage.includes("Payment is not configured")) {
+        console.error("Server error:", serverMessage);
+      }
     }
 
     return Promise.reject(error);

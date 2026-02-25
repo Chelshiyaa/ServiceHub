@@ -15,6 +15,12 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, ".env") });
 dotenv.config({ path: join(__dirname, "..", ".env") });
 
+// Quick visibility for Razorpay config (does NOT log secrets)
+console.log("🔑 Razorpay configured:", {
+  hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+  hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
+});
+
 // Routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
