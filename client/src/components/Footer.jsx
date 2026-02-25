@@ -63,21 +63,21 @@ const Footer = () => {
             <ul className="space-y-3 text-gray-400">
               <li className="flex items-center gap-2">
                 <FiMail className="text-primary-400" />
-                <a href="mailto:support@servicehub.com" className="hover:text-primary-400 transition-colors">
-                  support@servicehub.com
+                <a href="mailto:gautamchelsea639@gmail.com" className="hover:text-primary-400 transition-colors">
+                  gautamchelsea639@gmail.com
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <FiPhone className="text-primary-400" />
-                <a href="tel:+15551234567" className="hover:text-primary-400 transition-colors">
-                  +1 (555) 123-4567
+                <a href="tel:+919306642534" className="hover:text-primary-400 transition-colors">
+                  +91 9306642534
                 </a>
               </li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 ServiceHub. All rights reserved. Built with ❤️ for local communities.</p>
+          <p>&copy; 2026 ServiceHub. All rights reserved. Built with ❤️ for local communities.</p>
         </div>
       </div>
     </footer>
