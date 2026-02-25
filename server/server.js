@@ -7,66 +7,85 @@ import { dirname, join } from "path";
 import connectDB from "./config/database.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
-// Load env vars
+// Resolve paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// Try server/.env first, then repo-root .env (common setup)
+
+// Load env (server/.env first, then root .env)
 dotenv.config({ path: join(__dirname, ".env") });
 dotenv.config({ path: join(__dirname, "..", ".env") });
 
-// Import routes (after env is loaded)
+// Routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import providerRoutes from "./routes/providerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 
-// Connect to database
+// Connect DB
 connectDB();
 
 const app = express();
 
-// Allowed Frontend Domains
+/* ============================
+   ALLOWED ORIGINS
+============================ */
 const allowedOrigins = [
-  "http://localhost:5173",
   "http://localhost:3000",
-
-  // ✅ Vercel domains (ADD BOTH)
+  "http://localhost:5173",
   "https://service-hub-git-main-chelshiyas-projects.vercel.app",
   "https://service-6kaiougi1-chelshiyas-projects.vercel.app",
 ];
 
-// Middleware
+/* ============================
+   MIDDLEWARE (ORDER IMPORTANT)
+============================ */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS Setup
-const corsOptions = {
-  origin: true,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-};
+/* ============================
+   CORS (FIXED)
+============================ */
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow server-to-server / postman / curl
+      if (!origin) return callback(null, true);
 
-app.use(cors(corsOptions));
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  })
+);
 
-// Preflight Requests
-app.options("*", cors(corsOptions));
-
-
-// Routes
+/* ============================
+   ROUTES
+============================ */
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/provider", providerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/booking", bookingRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "Server is running" });
 });
 
-// Error handler
+/* ============================
+   ERROR HANDLER (LAST)
+============================ */
 app.use(errorHandler);
 
+/* ============================
+   START SERVER
+============================ */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

@@ -1,0 +1,22 @@
+# Optional: Kustomize configuration for easier management
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: servicehub
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - mongodb-deployment.yaml
+  - server-deployment.yaml
+  - client-deployment.yaml
+  - ingress.yaml
+
+# Uncomment to use different image tags
+# images:
+#   - name: chelshiya01/servicehub-server
+#     newTag: v1.0.0
+#   - name: chelshiya01/servicehub-client
+#     newTag: v1.0.0
+

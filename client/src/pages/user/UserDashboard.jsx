@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserProfile } from '../../redux/slices/userSlice';
-import { FiUser, FiHeart, FiSearch, FiMail, FiPhone, FiMapPin, FiArrowRight } from 'react-icons/fi';
+import { FiUser, FiHeart, FiSearch, FiMail, FiPhone, FiMapPin, FiArrowRight, FiCalendar } from 'react-icons/fi';
 
 const UserDashboard = () => {
   const dispatch = useDispatch();
@@ -36,6 +36,14 @@ const UserDashboard = () => {
       link: '/search',
       gradient: 'from-primary-500 to-primary-600',
       bgColor: 'bg-primary-50',
+    },
+    {
+      icon: FiCalendar,
+      title: 'My Bookings',
+      description: 'View your service bookings',
+      link: '/user/bookings',
+      gradient: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-50',
     },
   ];
 

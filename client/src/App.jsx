@@ -16,6 +16,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import Home from "./pages/user/Home";
 import Search from "./pages/user/Search";
 import ProviderDetail from "./pages/user/ProviderDetail";
+import BookingPage from "./pages/booking/BookingPage";
+import MyBookings from "./pages/user/MyBookings";
 import UserDashboard from "./pages/user/UserDashboard";
 import UserProfile from "./pages/user/UserProfile";
 import Favorites from "./pages/user/Favorites";
@@ -51,6 +53,14 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/provider/:id" element={<ProviderDetail />} />
+          <Route
+            path="/book/provider/:id"
+            element={
+              <PrivateRoute allowedRoles={["user"]}>
+                <BookingPage />
+              </PrivateRoute>
+            }
+          />
 
           {/* Protected Search */}
           <Route
@@ -76,6 +86,14 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["user"]}>
                 <UserProfile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/user/bookings"
+            element={
+              <PrivateRoute allowedRoles={["user"]}>
+                <MyBookings />
               </PrivateRoute>
             }
           />

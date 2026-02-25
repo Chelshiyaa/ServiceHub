@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/axios';
 import { toggleFavorite } from '../../redux/slices/userSlice';
-import { FiMapPin, FiStar, FiHeart, FiPhone, FiMail, FiCheckCircle, FiClock, FiXCircle, FiArrowLeft } from 'react-icons/fi';
+import { FiMapPin, FiStar, FiHeart, FiPhone, FiMail, FiCheckCircle, FiClock, FiXCircle, FiArrowLeft, FiCalendar } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const ProviderDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const { favorites } = useSelector((state) => state.user);
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -166,6 +167,14 @@ const ProviderDetail = () => {
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <FiStar className="text-green-600" /> Service Details
                 </h3>
+                {provider.status === 'approved' && (
+                  <Link
+                    to={`/book/provider/${id}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors font-semibold mb-4"
+                  >
+                    <FiCalendar /> Book Now
+                  </Link>
+                )}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <FiStar className="text-yellow-500 fill-yellow-500" />
@@ -199,6 +208,21 @@ const ProviderDetail = () => {
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Book Now - only for logged-in users with role user */}
+            {user?.role === 'user' && (
+              <div className="mb-8">
+                <Link
+                  to={`/provider/${id}/book`}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl transition-all"
+                >
+                  <FiClock /> Book Now
+                </Link>
+                <p className="text-gray-500 text-sm mt-2">
+                  Select date & time and pay securely with Razorpay
+                </p>
               </div>
             )}
 

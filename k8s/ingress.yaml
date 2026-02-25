@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: servicehub-ingress
+  namespace: servicehub
+  annotations:
+    # AWS Load Balancer Controller annotations
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # SSL certificate ARN (replace with your ACM certificate ARN)
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account-id:certificate/cert-id
+    # Redirect HTTP to HTTPS
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # Health check settings
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '3'
+spec:
+  rules:
+    - http:
+        paths:
+          # API routes go to server
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: servicehub-server
+                port:
+                  number: 5000
+          # All other routes go to client (React Router)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: servicehub-client
+                port:
+                  number: 80
+
