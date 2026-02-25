@@ -8,12 +8,12 @@ import axios from "axios";
  *   e.g. VITE_API_URL="https://your-backend-domain.com/api"
  */
 
-// If VITE_API_URL is defined, use that. Otherwise fall back to relative `/api` (dev with proxy).
+// In dev: use Vite proxy (`/api` → http://localhost:5000/api)
+// In prod: set VITE_API_URL to full backend URL (including `/api`)
 const API_URL =
   (typeof import.meta !== "undefined" &&
     import.meta.env &&
-    import.meta.env.VITE_API_URL) ||
-  "/api";
+    import.meta.env.VITE_API_URL) || "/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

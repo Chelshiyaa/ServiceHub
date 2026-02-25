@@ -54,7 +54,8 @@ app.use(
       // allow server-to-server / postman / curl
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Allow explicitly listed origins OR any Vercel deployment
+      if (allowedOrigins.includes(origin) || origin.includes("vercel.app")) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));

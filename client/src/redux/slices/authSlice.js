@@ -67,8 +67,9 @@ export const loginUser = createAsyncThunk(
       toast.success("Login successful");
       return res.data;
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Login failed");
-      return rejectWithValue(null);
+      const message = error?.response?.data?.message || "Login failed";
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -85,8 +86,9 @@ export const loginProvider = createAsyncThunk(
       toast.success("Login successful");
       return res.data;
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Login failed");
-      return rejectWithValue(null);
+      const message = error?.response?.data?.message || "Login failed";
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -103,8 +105,9 @@ export const loginAdmin = createAsyncThunk(
       toast.success("Admin login successful");
       return res.data;
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Login failed");
-      return rejectWithValue(null);
+      const message = error?.response?.data?.message || "Login failed";
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
