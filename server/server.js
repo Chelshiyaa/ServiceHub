@@ -35,6 +35,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://service-hub-git-main-chelshiyas-projects.vercel.app",
   "https://service-6kaiougi1-chelshiyas-projects.vercel.app",
+  "https://service-hub-bice.vercel.app",
 ];
 
 /* ============================
