@@ -1,33 +1,35 @@
 import axios from "axios";
 
 /**
- * We are using COOKIE-BASED AUTH.
- * Frontend and backend are same-origin via Nginx.
- * So:
- *  ❌ No Authorization header
- *  ❌ No localStorage token
- *  ✅ httpOnly cookie only
+ * COOKIE-BASED AUTH (httpOnly cookie).
+ *
+ * - In development: we use Vite's proxy → `/api`
+ * - In production: set `VITE_API_URL` to your backend's full URL (including `/api`)
+ *   e.g. VITE_API_URL="https://your-backend-domain.com/api"
  */
 
-// Always use relative /api (nginx proxies to backend)
-const API_URL = "/api";
+// If VITE_API_URL is defined, use that. Otherwise fall back to relative `/api` (dev with proxy).
+const API_URL =
+  (typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_API_URL) ||
+  "/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // ✅ VERY IMPORTANT
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Handle API errors cleanly
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
       const url = error?.config?.url || "";
 
-      // /me can fail when user is not logged in → ignore
+      // `/me` can fail when user is not logged in – ignore logging in that case
       if (!url.includes("/me")) {
         console.error(
           "Authentication error:",
